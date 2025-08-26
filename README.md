@@ -415,7 +415,6 @@ http://localhost:3000
 - This assumption was made to simplify the logic during development and testing. If the API provides more explicit flags in the future (e.g., `direction`, `type`), this logic can be updated accordingly.
 
 ## Scalability
-## Scalability
 
 - **Backend (NestJS)**
   - The backend is structured using a `modules/` folder. Each feature (e.g., `transactions/`) is encapsulated into its own **module**, with its corresponding **controller**, **service**, and **DTOs**.

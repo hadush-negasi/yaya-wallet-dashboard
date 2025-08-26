@@ -22,15 +22,6 @@ export default function Dashboard() {
     fetchCurrentAccount().then(setCurrentAccount);
   }, []);
 
-  // Load transactions when page or query changes
-  useEffect(() => {
-    if (isSearchMode) {
-      loadSearchTransactions();
-    } else {
-      loadTransactions();
-    }
-  }, [isSearchMode, loadSearchTransactions, loadTransactions]);
-
   // Load normal transactions
   const loadTransactions = useCallback(async () => {
     setLoading(true);
@@ -60,6 +51,16 @@ export default function Dashboard() {
       setLoading(false);
     }
   }, [query, page]);
+
+  // Load transactions when page or query changes
+  useEffect(() => {
+    if (isSearchMode) {
+      loadSearchTransactions();
+    } else {
+      loadTransactions();
+    }
+  }, [isSearchMode, loadSearchTransactions, loadTransactions]);
+
 
   // Handle search button click
   const handleSearch = async () => {

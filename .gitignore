@@ -1,0 +1,11 @@
+# === Environment Files ===
+# Ignore all .env files in any directory
+client/.env
+backend/.env
+
+# Dependency directories
+backend/node_modules/
+client/node_modules/
+# Build outputs
+backend/dist/
+**/build/

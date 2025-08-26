@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Smooth transitions for navigation */
+.nav-link {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Optional: Active state styling */
+.nav-link.active {
+  @apply bg-blue-100 text-blue-700;
+}

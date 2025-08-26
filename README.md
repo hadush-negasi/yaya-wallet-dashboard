@@ -1,42 +1,53 @@
 # YaYa Wallet Transactions Dashboard
 
-This is a full-stack dashboard application for monitoring YaYa Wallet transactions. 
-The **backend (NestJS)** securely communicates with YaYa Wallet’s REST API using HMAC-based authentication.
-The **frontend (React.js + Tailwind)** displays a paginated, searchable table of transactions with incoming/outgoing indicators.
-## 🚀 Features
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://yaya-wallet-dashboard.netlify.app)
+
+A simple dashboard to view and search transactions from the YaYa Wallet API.
+
+## Live Demo
+Check out the live demo here: [yaya-wallet-dashboard.netlify.app](https://yaya-wallet-dashboard.netlify.app)
+
+Backend API is deployed on Render: Can't share the link for security reasons.
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Implementation](#implementation)
+  - [Backend Implementation](#backend-implementation)
+  - [Frontend Implementation](#frontend-implementation)
+- [How to Run Locally](#how-to-runtest-code-locally)
+- [Assumptions](#assumptions)
+- [Scalability](#scalability)
+
+## Features
 - Fetches transactions from the YaYa Wallet REST API (via NestJS backend proxy).
-- Displays a tabular list with:
-  - Transaction ID
-  - Sender
-  - Receiver
-  - Amount
-  - Currency
-  - Cause
-  - Created At
-- Pagination (`?p=` query parameter support).
-- Search by sender, receiver, cause, or transaction ID.
-- Incoming/outgoing transactions highlighted visually:
-  - **Green** → Incoming
-  - **Red** → Outgoing
-  - **Top-up** transactions (sender == receiver) treated as incoming.
-- Responsive UI using Tailwind CSS.
+- Displays a tabular list with: 
+  - Transaction ID, Sender, Receiver, Amount, Currency, Cause, Created At
+  - Pagination (`?p=` query parameter support).
+  - Search by sender, receiver, cause, or transaction ID.
+  - Incoming/outgoing transactions highlighted visually:
+    - **Green** → Incoming
+    - **Red** → Outgoing
+    - **Top-up** transactions (sender == receiver) treated as incoming.
+  - Responsive UI using Tailwind CSS.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 - **Backend**: [NestJS](https://nestjs.com/) (Node.js framework)
   - Handles API integration
   - HMAC signing for security (per YaYa Wallet spec)
   - Environment variable config (`.env`)
-- **Frontend**: [Create React App](https://create-react-app.dev/) + Tailwind CSS
+- **Frontend**: [React](https://create-react-app.dev/) + Tailwind CSS
   - Simple dashboard UI
   - React hooks for state management
   - Axios for API calls
 
 ---
-# Implementation
+## Implementation
 
-## Backend
+### Backend Implementation
 
 ### 1. Project Setup
 
@@ -57,23 +68,25 @@ npm install @nestjs/axios @nestjs/config class-validator class-transformer helme
 ```
 backend/
 ├── src/
-│   ├── common/                       # Shared utilities and services
-│   │   ├── time-offset.service.ts    # Handles server time offset with YAYA API
-│   │   └── yaya-auth.util.ts         # Signing utility for authenticated requests
+│   ├── common/                            # Shared utilities and services
+│   │   ├── time-offset.service.ts         # Handles server time offset with YAYA API
+│   │   └── yaya-auth.util.ts              # Signing utility for authenticated requests
 │   │
-│   ├── transactions/                 # Transaction module (API integration)
-│   │   ├── dto/                      # Data Transfer Objects
-│   │   │   └── search.dto.ts         # DTO for transaction search
-│   │   ├── transactions.controller.ts # Defines endpoints for transactions
-│   │   ├── transactions.module.ts     # Module wiring
-│   │   └── transactions.service.ts    # Core logic for API calls & signing
+│   ├── modules/                           # Feature-based modules for scalability
+│   │   └── transactions/                  # Transaction module (API integration)
+│   │       ├── dto/                       # Data Transfer Objects
+│   │       │   └── search.dto.ts          # DTO for transaction search
+│   │       ├── transactions.controller.ts # Defines endpoints for transactions
+│   │       ├── transactions.module.ts     # Module wiring
+│   │       └── transactions.service.ts    # Core logic for API calls & signing
 │   │
-│   ├── app.module.ts                 # Root application module
-│   └── main.ts                       # Application entrypoint
+│   ├── app.module.ts                      # Root application module
+│   └── main.ts                            # Application entrypoint
 │
-├── .env                              # Environment variables (ignored in git)
-├── package.json                      # Project dependencies & scripts
-└── tsconfig.json                     # TypeScript configuration
+├── .env                                   # Environment variables (ignored in git)
+├── package.json                           # Project dependencies & scripts
+└── tsconfig.json                          # TypeScript configuration
+
 ```
 
 #### 1.3 Set up .env to store sensitive information: 
@@ -81,7 +94,7 @@ backend/
 YAYA_API_BASE=https://sandbox.yayawallet.com    # base url
 YAYA_API_KEY=key-test_...                       # API KEY from YAYA Wallet
 YAYA_API_SECRET=eyJ0eXAiOiJKV...                # API SECRET from YAYA Wallet
-CURRENT_ACCOUNT_NAME=optional                   # The account name currently being used todetermine incoming/outgoing  transactions
+CURRENT_ACCOUNT_NAME=optional # The account name currently being used to determine incoming/outgoing  transactions
 PORT=3001                                       # PORT NestJs app runs
 ```
 **DoNot  commit .env file to github repo**
@@ -138,8 +151,8 @@ export function signRequest(params) {
     const { secret, method, endpoint, body, timestamp } = params;
     const bodyString = body ? JSON.stringify(body) : '';
     const prehash = `${timestamp}${method}${endpoint}${bodyString}`; # concatenate
-    const hmac = crypto.createHmac('sha256', secret); # SHA256 hashing
-    hmac.update(prehash);
+    const hmac = crypto.createHmac('sha256', secret); 
+    hmac.update(prehash); # SHA256 hashing
     const signature = hmac.digest('base64'); 
     return signature;
 }
@@ -149,7 +162,7 @@ Only the endpoint path is signed, not full URL, query parameters are appended af
 
 ```bash
 const endpoint = '/api/en/transaction/find-by-user';
-const url = `${this.base}${endpoint}?p=${page}`;
+const url = `https://sandbox.yayawallet.com${endpoint}?p=${page}`;
 this.http.get(url, { headers: this.headers('GET', endpoint) });
 ```
 #### 3.3 Headers Setup
@@ -176,8 +189,9 @@ getCurrentAccountName() – optional helper for frontend to determine incoming/o
 
 TimeOffsetService ensures that YAYA-API-TIMESTAMP is synchronized with YaYa Wallet server time to prevent request expiry. i have used the time endpoint to query API server time.
 ```bash
- # get the server time from this and save it as serverMs
-const res = await firstValueFrom(this.http.get(`${baseUrl}/api/en/time`));
+# get the server time from this and save it as serverMs
+# i use the 'https://sandbox.yayawallet.com/api/en/time' to get server time
+const res = await firstValueFrom(this.http.get('https://sandbox.yayawallet.com/api/en/time'));
 const serverMs = Number(res.data?.time); # Extract server time from object response
 const localMs = Date.now();
 this.offsetMs = serverMs - localMs;
@@ -194,7 +208,7 @@ Endpoints are hardcoded, which is safe because they are public API paths.
 Helmet middleware can be added for HTTP security headers.
 ```
 
-## FrontEnd
+### FrontEnd Implementation
 
 ### Project Setup
 
@@ -212,21 +226,24 @@ npx tailwindcss init
 #### Project Structure
 ```
 src/
-├── components/
-│   ├── Badge.js
-│   ├── TransactionTable.js
-│   └── Pagination.js
-├── pages/
-│   └── Dashboard.js
-├── lib/
-│   └── api.js
-├── App.js
-└── index.js
+├── components/             # Reusable UI components
+│   ├── Navbar.js           # Navigation header
+│   ├── TransactionTable.js # Transactions display
+│   ├── Pagination.js       # Pagination controls
+│   └── Badge.js            # Status badges
+├── pages/                  # Page components
+│   ├── Dashboard.js        # Main transactions page
+│   └── NotFound.js         # 404 error page
+├── lib/                    # Utilities and APIs
+│   └── api.js              # API communication
+├── App.js                  # Main app component with routing
+└── index.js                # Application entry point
 ```
 #### Environment Configuration
 Created .env file with environment variables:
 ```bash
-REACT_APP_API_BASE=http://localhost:3001 # Backend api to make requests
+# Backend api to make requests or you can change it to the deployed backend url like on render
+REACT_APP_API_BASE=http://localhost:3001 
 ```
 #### Core Components Implementation
 API Service Layer (lib/api.js)
@@ -300,66 +317,141 @@ useNavigate() for programmatic navigation
 
 Route-based URL structure (/transactions, /search)
 ```
-# How to Run/test code locally
-
-
-
-## 📂 Project Structure
-root/
-├── backend/ # NestJS server
-│ ├── src/
-│ ├── test/
-│ └── ...
-├── frontend/ # React (CRA) client
-│ ├── src/
-│ ├── public/
-│ └── ...
-└── README.md # this file
-
----
-
-
----
-
-## ⚙️ Setup Instructions
-
-### 1. Clone the repository
+## How to Run/test code locally
+### Backend — Run & Test Locally
+1. Clone the Repository
 ```bash
-git clone https://github.com/<your-username>/yaya-wallet-dashboard.git
-cd yaya-wallet-dashboard
-
+git clone https://github.com/hadush-negasi/yaya-wallet-dashboard.git
+cd yaya-wallet-dashboard/backend
 ```
-### 2. Backend(NestJs)
+2. Install Dependencies
+Make sure you have Node.js (>=18) and npm/yarn installed.
 ```bash
-cd backend
 npm install
-cp .env.example .env   # Add API credentials & base URL here
+```
+3. Configure Environment Variables
+
+Create a .env file in the backend folder (or copy from .env.example if available). For example:
+```bash
+API_KEY=your_api_key_here         # yaya-api-key
+API_SECRET=your_api_secret_here   # yaya-api secret 
+CURRENT_ACCOUNT_NAME=yayawalletpi # current user Account name
+PORT=3001                         # Nestjs port
+```
+4. Run the Backend
+```bash
 npm run start:dev
 ```
-### 3. FrontEnd(React)
+The backend will run at:
+👉 http://localhost:3001
+
+5. Test the API (Postman / Thunder Client)
+
+You can test using either Postman or the Thunder Client VSCode extension.
+
+Example Requests:
+
+1. Get Transactions (paginated)
 ```bash
-cd ../frontend
+GET http://localhost:3001/transactions?p=1
+```
+2. Search Transactions
+
+This will search the transactions by sender, receiver, transaction id, cause, just put the it in the query key in the body section.
+```bash
+POST http://localhost:3001/transactions/search
+Content-Type: application/json
+
+{
+  "query": "surafel araya"
+}
+```
+
+3. Get Current Account Transactions
+
+This will return the account for the dashboard to monitor for the incoming\outgoing, i have assumed the account name is 'yayawalletpi'.
+
+for now i have put the account name in the .env file of backend, as CURRENT_ACCOUNT_NAME=yayawalletpi
+```bash
+GET http://localhost:3001/transactions/me
+```
+this will just read read the CURRENT_ACCOUNT_NAME from .env file and return it as json.
+
+### Frontend Run locally
+1. Clone the Repository
+if you have already cloned the repo while trying to run the backend, no need to clone the repo again. just go to 
+```bash 
+cd client 
+```
+
+otherwise, clone the repo first
+```bash
+git clone https://github.com/hadush-negasi/yaya-wallet-dashboard.git
+cd client
+```
+2. Install Dependencies
+```bash
 npm install
+```
+3. Environment Configuration
+Create a .env file in the root directory with the following variables:
+```bash
+REACT_APP_API_BASE=http://localhost:3001  # Nestjs backend url to fetch data
+```
+4. Start the Development Server
+```bash
 npm start
 ```
-Backend (NestJS) — Implementation & Testing Guide
+5. Access the Application
+Open your browser and navigate to:
+```bash
+http://localhost:3000
+```
+---
+## Assumptions
 
-Stack: NestJS, @nestjs/axios (HTTP client), @nestjs/config (env), Helmet (security), class-validator / class-transformer (DTO validation)
-Goal: Expose a secure proxy API that signs requests to YaYa Wallet’s REST API using HMAC per their spec, so the frontend never sees API credentials.
+- While integrating with the YAYA Wallet API, every transaction record retrieved from the `https://sandbox.yayawallet.com/api/en/transaction/find-by-user` endpoint contained the same account name: **`yayawalletpi`**.  
+- Based on this observation, I assumed that the `yayawalletpi` account name could be used as a reference point to determine whether a transaction is **incoming** or **outgoing**.  
+- This assumption was made to simplify the logic during development and testing. If the API provides more explicit flags in the future (e.g., `direction`, `type`), this logic can be updated accordingly.
 
-1) Create the NestJS project
-# Prereqs: Node 18+, npm 9+, Nest CLI
-npm i -g @nestjs/cli
+## Scalability
+## Scalability
 
-# Create project
-nest new backend
-cd backend
-1.1 Install dependencies
-npm i @nestjs/axios @nestjs/config helmet
-npm i class-validator class-transformer
+- **Backend (NestJS)**
+  - The backend is structured using a `modules/` folder. Each feature (e.g., `transactions/`) is encapsulated into its own **module**, with its corresponding **controller**, **service**, and **DTOs**.
+  - This modular structure makes it easy to add new features (e.g., `users`, `accounts`, `payments`) without breaking existing functionality.
+  - Shared utilities are centralized under `common/`, encouraging code reuse and reducing duplication.
+  - By following NestJS best practices, we can also extend scalability further with:
+    - Database integration (PostgreSQL, MongoDB, etc.) using Prisma/TypeORM.
+    - Microservices (e.g., Kafka, RabbitMQ) if horizontal scaling is needed.
+    - Caching (e.g., Redis) for improving API performance.
+
+- **Frontend (React)**
+  - The frontend is organized into `components/` and `pages/`, following a clean separation of concerns.
+  - Currently, only a **Dashboard** page is implemented, but the structure allows adding more pages easily (e.g., **Account**, **Login**, **Transactions History**, **Settings**).
+  - Components are designed to be **reusable** and **composable**, enabling faster UI expansion.
+  - Future scalability can include:
+    - State management (Redux, Zustand, or React Query).
+    - Authentication & role-based access.
+    - API pagination, filtering, and sorting support for large data sets.
+
+- **Overall**
+  - Both backend and frontend are designed with **extensibility** in mind.
+  - New features can be added independently without tightly coupling different parts of the system.
+  - The architecture can evolve into a **full-featured financial dashboard** with user management, reporting, analytics, and integrations.
 
 
 
+## About the Author
+
+**Hadush Negasi** – Computer Engineering Graduate | Full-Stack Developer  
+
+- Passionate about building scalable web applications and modern dashboards.  
+- Experienced with **NestJS**, **React**, **Node.js**, **MongoDB**, and **Firebase**.  
+- Interested in API integrations, data visualization, and creating maintainable codebases.  
+- GitHub: [github.com/hadush-negasi](https://github.com/hadush-negasi)  
+- LinkedIn: [linkedin.com/in/hadush-brhane](https://www.linkedin.com/in/hadush-brhane/)  
+- Location: Ethiopia
 
 
 

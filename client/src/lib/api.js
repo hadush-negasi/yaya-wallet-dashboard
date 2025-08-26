@@ -16,7 +16,7 @@ export async function searchTransactions(query, page = 1) {
   return res.json();
 }
 
-// fetch the current user from backend
+// fetch the current user from backend, for now the backend has hardcoded the current account in the .env file
 export async function fetchCurrentAccount() {
   try {
     const res = await fetch(`${process.env.REACT_APP_API_BASE}/transactions/me`);

@@ -2,7 +2,7 @@ import { IsString, Length } from 'class-validator';
 
 
 export class SearchDto {
-    @IsString()
-    @Length(1, 100)
+    @IsString()   // search query should be string
+    @Length(1, 100) // limit the length of search query to 100 characters
     query!: string;
 }

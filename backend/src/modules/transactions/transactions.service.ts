@@ -24,6 +24,7 @@ export class TransactionsService {
         this.current = this.config.get<string>('CURRENT_ACCOUNT_NAME');
     }
 
+    // method to create yaya wallet header specification with a signed message
     private headers(method: string, endpoint: string, body?: unknown) {
         const ts = String(this.time.nowMs());
         const sign = signRequest({
@@ -42,7 +43,6 @@ export class TransactionsService {
     }
 
     async getByUser(page = 1) {
-        //const endpoint = `/api/en/transaction/find-by-user?p=${page}`;
         const endpoint = '/api/en/transaction/find-by-user';
         const url = `${this.base}${endpoint}?p=${page}`;
         await this.time.ensureOffset(this.base);

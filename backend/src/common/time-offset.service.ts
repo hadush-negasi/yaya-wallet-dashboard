@@ -14,7 +14,7 @@ export class TimeOffsetService {
     if (this.offsetMs !== 0) return; // already set
 
     try {
-      const res = await firstValueFrom(this.http.get(`${baseUrl}/api/en/time`));
+      const res = await firstValueFrom(this.http.get(`${baseUrl}/api/en/time`)); // yaya wallet sandbox time endpoint used
       
       // Extract server time from object response
       const serverMs = Number(res.data?.time);

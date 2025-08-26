@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
-import { signRequest } from '../common/yaya-auth.util';
-import { TimeOffsetService } from '../common/time-offset.service';
+import { signRequest } from 'src/common/yaya-auth.util';
+import { TimeOffsetService } from 'src/common/time-offset.service';
 
 @Injectable()
 export class TransactionsService {

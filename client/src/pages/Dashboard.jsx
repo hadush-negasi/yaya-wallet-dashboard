@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { fetchTransactions, searchTransactions, fetchCurrentAccount } from "../lib/api";
 import TransactionTable from "../components/TransactionTable";
 import Pagination from "../components/Pagination";
 
 export default function Dashboard() {
-  const [currentAccount, setCurrentAccount] = useState([]); // store the current account 
+  const [currentAccount, setCurrentAccount] = useState(""); // store the current account 
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(false); // to show loading spinner
   const [error, setError] = useState(null);  // to show error
-  const [lastPage, setLastPage] = useState(1); // store the latpage returned from backend api
+  const [lastPage, setLastPage] = useState(1); // store the last page returned from backend api
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(""); // Local state for search input
   
@@ -22,17 +22,8 @@ export default function Dashboard() {
     fetchCurrentAccount().then(setCurrentAccount);
   }, []);
 
-  // Load transactions when page or query changes
-  useEffect(() => {
-    if (isSearchMode) {
-      loadSearchTransactions();
-    } else {
-      loadTransactions();
-    }
-  }, [page, query]);
-
   // Load normal transactions
-  const loadTransactions = async () => {
+  const loadTransactions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -44,10 +35,10 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
   // Load search results
-  const loadSearchTransactions = async () => {
+  const loadSearchTransactions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -59,7 +50,16 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query, page]);
+
+  // Load transactions when page or query changes
+  useEffect(() => {
+    if (isSearchMode) {
+      loadSearchTransactions();
+    } else {
+      loadTransactions();
+    }
+  }, [isSearchMode, loadSearchTransactions, loadTransactions]);
 
   // Handle search button click
   const handleSearch = async () => {
@@ -84,6 +84,13 @@ export default function Dashboard() {
     }
   };
 
+  // Handle Enter key in search input
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">YaYa Wallet Transactions</h1>
@@ -94,17 +101,20 @@ export default function Dashboard() {
           placeholder="Search by sender, receiver, cause or ID"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
+          onKeyDown={handleKeyDown}
         />
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded"
           onClick={handleSearch}
+          disabled={loading}
         >
-          Search
+          {loading ? "Searching..." : "Search"}
         </button>
         {isSearchMode && (
           <button
             className="px-4 py-2 bg-gray-600 text-white rounded"
             onClick={handleClearSearch}
+            disabled={loading}
           >
             Clear
           </button>
@@ -127,12 +137,17 @@ export default function Dashboard() {
             currentPage={page}
             lastPage={lastPage}
             onPageChange={handlePageChange}
+            disabled={loading}
           />
         </>
       )}
 
       {!loading && !error && transactions.length === 0 && isSearchMode && (
         <div className="text-gray-500">No transactions found for "{query}"</div>
+      )}
+
+      {!loading && !error && transactions.length === 0 && !isSearchMode && (
+        <div className="text-gray-500">No transactions found</div>
       )}
     </div>
   );

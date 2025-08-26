@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Dashboard from "./pages/Dashboard";
 import Navbar from "./components/Navbar";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -12,6 +13,8 @@ function App() {
             <Route path="/" element={<Navigate to="/transactions" replace />} />
             <Route path="/transactions" element={<Dashboard />} />
             <Route path="/search" element={<Dashboard />} />
+            {/* Catch all unmatched routes */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
       </div>

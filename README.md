@@ -10,7 +10,7 @@ Check out the live demo here: [yaya-wallet-dashboard.netlify.app](https://yaya-w
 Backend API is deployed on Render: Can't share the link for security reasons.
 
 ## Table of Contents
-
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Implementation](#implementation)
@@ -19,6 +19,14 @@ Backend API is deployed on Render: Can't share the link for security reasons.
 - [How to Run Locally](#how-to-runtest-code-locally)
 - [Assumptions](#assumptions)
 - [Scalability](#scalability)
+
+## Screenshots
+
+### Dashboard
+![Dashboard Screenshot](./screenshots/dashboard.png)
+
+### Search Transaction
+![Transactions Screenshot](./screenshots/search.png)
 
 ## Features
 - Fetches transactions from the YaYa Wallet REST API (via NestJS backend proxy).
